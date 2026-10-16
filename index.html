@@ -105,8 +105,24 @@
   .btn:hover{border-color:var(--accent);background:rgba(124,92,255,.12);transform:translateY(-3px);}
   .btn.primary{background:linear-gradient(120deg,#7c5cff,#5a3ff0);border-color:transparent;font-weight:600;}
   .btn.primary:hover{box-shadow:0 14px 34px -12px rgba(124,92,255,.9);}
-
   footer{padding:52px 0 64px;text-align:center;color:#4c4c55;font-size:13px;border-top:1px solid var(--line);}
+
+  /* 游戏板块 */
+  .gamebox{
+    display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    background:linear-gradient(120deg,rgba(124,92,255,.16),rgba(0,224,198,.06));
+    border:1px solid rgba(124,92,255,.35);border-radius:18px;padding:24px 26px;
+    position:relative;overflow:hidden;
+  }
+  .gamebox::before{
+    content:"";position:absolute;right:-60px;top:-60px;width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle,rgba(0,224,198,.28),transparent 70%);
+  }
+  .gb-title{font-size:30px;font-weight:800;letter-spacing:8px;
+    background:linear-gradient(90deg,#7c5cff,#00e0c6);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .gb-sub{font-size:12px;color:var(--dim);letter-spacing:3px;margin-top:2px;}
+  .gamebox .btn{flex-shrink:0;position:relative;z-index:1;}
+
 
   /* 入场动画 */
   .reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.3,1);}
@@ -168,6 +184,20 @@
         <p>顺风不浪，逆风不崩，稳住就能翻。</p>
       </div>
     </div>
+  </section>
+
+  <section class="reveal">
+    <div class="tag">Game</div>
+    <h2>靶场射击 · RANGE</h2>
+    <p style="color:#b9b9c2;max-width:620px;margin-bottom:24px;">我自己做的网页射击游戏。点击射击，打爆头拿双倍分，连击越猛倍数越高。三种敌人、无限波次，敢不敢来试？</p>
+    <div class="gamebox">
+      <div class="gb-left">
+        <div class="gb-title">RANGE</div>
+        <div class="gb-sub">YUNJI 出品 · 网页版</div>
+      </div>
+      <a class="btn primary" href="game.html">🎮 开始游戏</a>
+    </div>
+    <p style="margin-top:16px;font-size:13px;color:#5c5c66;">支持手机触屏 / 电脑鼠标，无需下载，打开即玩。</p>
   </section>
 
   <section class="reveal">
