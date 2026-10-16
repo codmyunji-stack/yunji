@@ -107,6 +107,57 @@
   .btn.primary:hover{box-shadow:0 14px 34px -12px rgba(124,92,255,.9);}
   footer{padding:52px 0 64px;text-align:center;color:#4c4c55;font-size:13px;border-top:1px solid var(--line);}
 
+  /* 语言切换 */
+  .lang{
+    position:fixed;top:18px;right:18px;z-index:50;
+    display:inline-flex;align-items:center;gap:8px;
+    padding:9px 15px;border-radius:999px;cursor:pointer;
+    background:rgba(20,20,25,.78);border:1px solid var(--line);
+    color:var(--text);font-size:13px;font-weight:600;letter-spacing:1px;
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    transition:.28s;
+  }
+  .lang:hover{border-color:var(--accent);background:rgba(124,92,255,.16);}
+  .lang .icon{font-size:14px;}
+
+  /* 头像 */
+  .avatar{
+    width:104px;height:104px;border-radius:50%;margin-bottom:26px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:42px;font-weight:800;color:#fff;letter-spacing:-1px;
+    background:linear-gradient(135deg,#7c5cff,#00e0c6);
+    box-shadow:0 0 0 1px rgba(255,255,255,.08),0 22px 46px -18px rgba(124,92,255,.85);
+    position:relative;overflow:hidden;
+    animation:float 6s ease-in-out infinite;
+  }
+  .avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+  .avatar::after{
+    content:"";position:absolute;inset:-3px;border-radius:50%;
+    border:2px solid rgba(0,224,198,.35);animation:ring 3s ease-in-out infinite;
+  }
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  @keyframes ring{0%,100%{opacity:.25;transform:scale(1)}50%{opacity:.75;transform:scale(1.05)}}
+
+  /* 社交入口 */
+  .social{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px;}
+  .sbtn{
+    display:inline-flex;align-items:center;gap:9px;
+    padding:11px 20px;border-radius:12px;text-decoration:none;
+    font-size:14px;font-weight:600;color:#fff;
+    border:1px solid var(--line);background:var(--card);
+    transition:.28s;
+  }
+  .sbtn:hover{transform:translateY(-3px);}
+  .sbtn .tagline{font-weight:400;font-size:12px;opacity:.72;}
+  .sbtn.bili{border-color:rgba(0,174,236,.5);background:rgba(0,174,236,.1);}
+  .sbtn.bili:hover{background:rgba(0,174,236,.22);box-shadow:0 14px 30px -14px rgba(0,174,236,.9);}
+  .sbtn.dy{border-color:rgba(254,44,85,.5);background:rgba(254,44,85,.1);}
+  .sbtn.dy:hover{background:rgba(254,44,85,.22);box-shadow:0 14px 30px -14px rgba(254,44,85,.9);}
+  .sbtn.wx{border-color:rgba(7,193,96,.5);background:rgba(7,193,96,.1);}
+  .sbtn.wx:hover{background:rgba(7,193,96,.22);box-shadow:0 14px 30px -14px rgba(7,193,96,.9);}
+  .sbtn.gh{border-color:rgba(124,92,255,.5);background:rgba(124,92,255,.1);}
+  .sbtn.gh:hover{background:rgba(124,92,255,.24);box-shadow:0 14px 30px -14px rgba(124,92,255,.9);}
+
   /* 游戏板块 */
   .gamebox{
     display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
@@ -131,6 +182,8 @@
   @media (max-width:520px){
     section{padding:64px 0;}
     header{min-height:92vh;}
+    .avatar{width:88px;height:88px;font-size:36px;}
+    .lang{top:12px;right:12px;padding:8px 13px;font-size:12px;}
   }
 </style>
 </head>
@@ -139,20 +192,25 @@
 <div class="glow a"></div>
 <div class="glow b"></div>
 
+<button class="lang" id="langBtn" type="button" aria-label="切换语言 / Switch language">
+  <span class="icon">🌐</span><span id="langLabel">EN</span>
+</button>
+
 <div class="wrap">
 
   <header>
-    <div class="badge"><span class="dot"></span> ONLINE · 随时开黑</div>
+    <div class="avatar" id="avatar"><span id="avatarTxt">Y</span></div>
+    <div class="badge"><span class="dot"></span> <span data-zh="ONLINE · 随时开黑" data-en="ONLINE · Ready to squad up">ONLINE · 随时开黑</span></div>
     <h1>YUNJI</h1>
-    <div class="sub">游戏爱好者</div>
-    <div class="quote">“我很牛逼。”<br><span style="color:#6c6c76;font-size:.9em;">—— 不是自夸，是陈述事实。</span></div>
-    <div class="scroll"><div class="bar"></div>向下滚动</div>
+    <div class="sub" data-zh="游戏爱好者" data-en="Game Enthusiast">游戏爱好者</div>
+    <div class="quote" data-zh="“我很牛逼。”|—— 不是自夸，是陈述事实。" data-en="“I'm really good.”|— Not bragging, just facts.">“我很牛逼。”<br><span style="color:#6c6c76;font-size:.9em;">—— 不是自夸，是陈述事实。</span></div>
+    <div class="scroll"><div class="bar"></div><span data-zh="向下滚动" data-en="Scroll down">向下滚动</span></div>
   </header>
 
   <section class="reveal">
-    <div class="tag">About</div>
-    <h2>关于我</h2>
-    <div class="about">
+    <div class="tag" data-zh="关于" data-en="ABOUT">About</div>
+    <h2 data-zh="关于我" data-en="About Me">关于我</h2>
+    <div class="about" data-zh="我是 **YUNJI**，一个把热爱写在操作里的游戏爱好者。对我来说，游戏不只是消遣，是反应、判断与心态的综合较量。||喜欢挑战高难度、喜欢研究细节、喜欢在对局里证明自己。别人还在适应版本，我已经在找赢的方法。||简单来说：**我，很牛逼。**" data-en="I'm **YUNJI**, a gamer who puts passion into every move. To me, gaming isn't just a pastime — it's a contest of reflexes, judgment and mindset.||I love hard challenges, I dig into every detail, and I prove myself in the match. While others adapt to the meta, I'm already finding the way to win.||In short: **I'm really good.**">
       <p>我是 <strong>YUNJI</strong>，一个把热爱写在操作里的游戏爱好者。对我来说，游戏不只是消遣，是反应、判断与心态的综合较量。</p>
       <p>喜欢挑战高难度、喜欢研究细节、喜欢在对局里证明自己。别人还在适应版本，我已经在找赢的方法。</p>
       <p>简单来说：<strong>我，很牛逼。</strong></p>
@@ -160,69 +218,138 @@
   </section>
 
   <section class="reveal">
-    <div class="tag">Skills</div>
-    <h2>我的强项</h2>
+    <div class="tag" data-zh="强项" data-en="SKILLS">Skills</div>
+    <h2 data-zh="我的强项" data-en="My Strengths">我的强项</h2>
     <div class="grid">
       <div class="card">
         <div class="ico">🎯</div>
-        <h3>精准操作</h3>
-        <p>手速与准度并存，关键时刻从不手软。</p>
+        <h3 data-zh="精准操作" data-en="Precision Aim">精准操作</h3>
+        <p data-zh="手速与准度并存，关键时刻从不手软。" data-en="Speed and accuracy together — never hesitate when it counts.">手速与准度并存，关键时刻从不手软。</p>
       </div>
       <div class="card">
         <div class="ico">🧠</div>
-        <h3>战术意识</h3>
-        <p>读局势、抓节奏，预判对手的下一步。</p>
+        <h3 data-zh="战术意识" data-en="Tactical Mind">战术意识</h3>
+        <p data-zh="读局势、抓节奏，预判对手的下一步。" data-en="Read the flow, seize the tempo, predict the next move.">读局势、抓节奏，预判对手的下一步。</p>
       </div>
       <div class="card">
         <div class="ico">⚡</div>
-        <h3>极限反应</h3>
-        <p>0.1 秒的差距，就是胜负的差距。</p>
+        <h3 data-zh="极限反应" data-en="Lightning Reflex">极限反应</h3>
+        <p data-zh="0.1 秒的差距，就是胜负的差距。" data-en="A 0.1s gap is the gap between win and loss.">0.1 秒的差距，就是胜负的差距。</p>
       </div>
       <div class="card">
         <div class="ico">🔥</div>
-        <h3>心态稳定</h3>
-        <p>顺风不浪，逆风不崩，稳住就能翻。</p>
+        <h3 data-zh="心态稳定" data-en="Steady Mindset">心态稳定</h3>
+        <p data-zh="顺风不浪，逆风不崩，稳住就能翻。" data-en="No ego when ahead, no panic when behind — stay steady and flip it.">顺风不浪，逆风不崩，稳住就能翻。</p>
       </div>
     </div>
   </section>
 
   <section class="reveal">
-    <div class="tag">Game</div>
-    <h2>战术射击 · DELTA</h2>
-    <p style="color:#b9b9c2;max-width:620px;margin-bottom:24px;">低多边形 3D 第一人称战术射击。自由走位、瞄准爆头、掩体对枪，连杀倍率越打越高，无限波次等你来守。</p>
+    <div class="tag" data-zh="游戏" data-en="GAME">Game</div>
+    <h2 data-zh="战术射击 · DELTA" data-en="Tactical Shooter · DELTA">战术射击 · DELTA</h2>
+    <p style="color:#b9b9c2;max-width:620px;margin-bottom:24px;" data-zh="低多边形 3D 第一人称战术射击。自由走位、瞄准爆头、掩体对枪，连杀倍率越打越高，无限波次等你来守。" data-en="A low-poly 3D first-person tactical shooter. Free movement, headshots, cover fights — killstreak multipliers climb higher and endless waves await.">低多边形 3D 第一人称战术射击。自由走位、瞄准爆头、掩体对枪，连杀倍率越打越高，无限波次等你来守。</p>
     <div class="gamebox">
       <div class="gb-left">
         <div class="gb-title">DELTA</div>
-        <div class="gb-sub">YUNJI 出品 · 3D 网页版</div>
+        <div class="gb-sub" data-zh="YUNJI 出品 · 3D 网页版" data-en="by YUNJI · 3D Web Build">YUNJI 出品 · 3D 网页版</div>
       </div>
-      <a class="btn primary" href="fps.html">🎮 进入战场</a>
+      <a class="btn primary" href="fps.html" data-zh="🎮 进入战场" data-en="🎮 Enter Battlefield">🎮 进入战场</a>
     </div>
-    <p style="margin-top:16px;font-size:13px;color:#5c5c66;">手机左侧摇杆移动、右侧滑动转向、点按开火；电脑 WASD + 鼠标，点击锁定视角。<br>
+    <p style="margin-top:16px;font-size:13px;color:#5c5c66;" data-zh="手机左侧摇杆移动、右侧滑动转向、点按开火；电脑 WASD + 鼠标，点击锁定视角。||想玩初代 2D 靶场？|经典模式 · RANGE →" data-en="Mobile: left stick to move, right swipe to turn, tap to fire. PC: WASD + mouse, click to lock the view.||Want the original 2D range?|Classic Mode · RANGE →">手机左侧摇杆移动、右侧滑动转向、点按开火；电脑 WASD + 鼠标，点击锁定视角。<br>
       想玩初代 2D 靶场？<a href="game.html" style="color:var(--accent2);text-decoration:none;border-bottom:1px dashed rgba(0,224,198,.4);">经典模式 · RANGE →</a></p>
   </section>
 
   <section class="reveal">
-    <div class="tag">Contact</div>
-    <h2>联系我</h2>
-    <div class="links">
-      <a class="btn primary" href="weixin://" onclick="copyWX(event)">
-        💬 微信 17731310509
+    <div class="tag" data-zh="联系" data-en="CONTACT">Contact</div>
+    <h2 data-zh="联系我" data-en="Get in Touch">联系我</h2>
+    <div class="social">
+      <a class="sbtn bili" href="https://space.bilibili.com/" target="_blank" rel="noopener noreferrer">
+        <span>📺</span><span>B站</span><span class="tagline" data-zh="看我的操作" data-en="Watch me play">看我的操作</span>
       </a>
-      <a class="btn" href="javascript:void(0)" onclick="copyWX(event)">
-        📋 复制微信号
+      <a class="sbtn dy" href="https://www.douyin.com/" target="_blank" rel="noopener noreferrer">
+        <span>🎵</span><span>抖音</span><span class="tagline" data-zh="精彩集锦" data-en="Highlights">精彩集锦</span>
+      </a>
+      <a class="sbtn gh" href="https://github.com/codmyunji-stack" target="_blank" rel="noopener noreferrer">
+        <span>🐙</span><span>GitHub</span><span class="tagline">codmyunji-stack</span>
+      </a>
+      <a class="sbtn wx" href="weixin://" onclick="copyWX(event)">
+        <span>💬</span><span data-zh="微信" data-en="WeChat">微信</span><span class="tagline">17731310509</span>
       </a>
     </div>
-    <p style="margin-top:20px;font-size:13px;color:#5c5c66;">开黑、交流、合作 —— 欢迎随时找我。</p>
+    <p style="margin-top:20px;font-size:13px;color:#5c5c66;" data-zh="开黑、交流、合作 —— 欢迎随时找我。" data-en="Squad up, chat, collaborate — hit me up anytime.">开黑、交流、合作 —— 欢迎随时找我。</p>
   </section>
 
   <footer>
-    © <span id="yr"></span> YUNJI · 保持热爱，持续牛逼
+    © <span id="yr"></span> YUNJI · <span data-zh="保持热爱，持续牛逼" data-en="Stay passionate, stay unstoppable">保持热爱，持续牛逼</span>
   </footer>
 
 </div>
 
 <script>
   document.getElementById('yr').textContent = new Date().getFullYear();
+
+  /* ===== 可选：把下面一行换成你的头像图片 URL，就会自动替换成图片 ===== */
+  var AVATAR_URL = '';   // 例如 'https://xxx.com/avatar.jpg'
+
+  (function initAvatar(){
+    if(!AVATAR_URL) return;
+    var box = document.getElementById('avatar');
+    if(!box) return;
+    var img = document.createElement('img');
+    img.src = AVATAR_URL;
+    img.alt = 'YUNJI';
+    img.onload = function(){ box.innerHTML = ''; box.appendChild(img); };
+  })();
+
+  /* ===== 中英双语切换 ===== */
+  var LANG_KEY = 'yunji_lang';
+  // 给带 data-zh/data-en 的元素应用语言；文本中的 | 表示换行，**x** 表示加粗
+  function renderRich(el, raw){
+    el.textContent = '';
+    String(raw).split('|').forEach(function(seg, i){
+      if(i > 0) el.appendChild(document.createElement('br'));
+      // 处理 **bold** 片段
+      var parts = seg.split(/\*\*(.+?)\*\*/g);
+      parts.forEach(function(t, k){
+        if(!t) return;
+        if(k % 2 === 1){
+          var b = document.createElement('strong');
+          b.textContent = t;
+          el.appendChild(b);
+        } else {
+          el.appendChild(document.createTextNode(t));
+        }
+      });
+    });
+  }
+  function applyLang(lang){
+    document.querySelectorAll('[data-zh][data-en]').forEach(function(el){
+      var raw = el.getAttribute(lang === 'en' ? 'data-en' : 'data-zh');
+      // 含 '|' 或 '**' 的走富文本渲染，其余直接写 textContent（保持结构简单）
+      if(raw.indexOf('|') >= 0 || raw.indexOf('**') >= 0){
+        renderRich(el, raw);
+      } else {
+        el.textContent = raw;
+      }
+    });
+    document.documentElement.lang = (lang === 'en' ? 'en' : 'zh-CN');
+    document.title = (lang === 'en' ? 'YUNJI · Homepage' : 'YUNJI · 个人主页');
+    var lb = document.getElementById('langLabel');
+    if(lb) lb.textContent = (lang === 'en' ? '中文' : 'EN');
+    try{ localStorage.setItem(LANG_KEY, lang); }catch(e){}
+  }
+  (function initLang(){
+    var saved = 'zh';
+    try{ saved = localStorage.getItem(LANG_KEY) || 'zh'; }catch(e){}
+    if(saved !== 'en') saved = 'zh';
+    applyLang(saved);
+    var btn = document.getElementById('langBtn');
+    if(btn) btn.addEventListener('click', function(){
+      var cur = 'zh';
+      try{ cur = localStorage.getItem(LANG_KEY) || 'zh'; }catch(e){}
+      applyLang(cur === 'en' ? 'zh' : 'en');
+    });
+  })();
 
   // 滚动入场
   const io = new IntersectionObserver((es)=>{
