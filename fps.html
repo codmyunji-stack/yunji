@@ -177,16 +177,17 @@ h1{margin:0 0 4px;font-size:34px;letter-spacing:.2em;text-align:center;
       <div class="diffs">
         <button class="diff" data-d="0">轻松</button>
         <button class="diff sel" data-d="1">普通</button>
-        <button class="diff" data-d="2">硬核</button>
+         <button class="diff" data-d="2">硬核</button>
       </div>
     </div>
     <div class="divider"></div>
     <div class="stat"><span>历史最高分</span><b id="mbest">0</b></div>
     <div class="stat"><span>最多击杀</span><b id="mkills">0</b></div>
     <div class="row">
+      <button class="btn ghost" id="btnSnd">音效：开</button>
       <button class="btn ghost" id="btnHelp">操作说明</button>
-      <button class="btn ghost" id="btnHome">返回主页</button>
     </div>
+    <button class="btn ghost" id="btnHome" style="margin-top:10px">返回主页</button>
   </div>
 </div>
 
@@ -212,6 +213,7 @@ h1{margin:0 0 4px;font-size:34px;letter-spacing:.2em;text-align:center;
     <h1>PAUSED</h1>
     <div class="sub">已暂停</div>
     <button class="btn primary" id="btnResume">继续战斗</button>
+    <button class="btn ghost" id="btnSnd2">音效：开</button>
     <button class="btn ghost" id="btnRestart2">重新开始</button>
     <button class="btn ghost" id="btnMenu2">返回菜单</button>
   </div>
@@ -228,7 +230,17 @@ h1{margin:0 0 4px;font-size:34px;letter-spacing:.2em;text-align:center;
     <div class="stat"><span>存活波次</span><b id="fwave">1</b></div>
     <div class="stat"><span>击杀数</span><b id="fkills">0</b></div>
     <div class="stat"><span>爆头次数</span><b id="fhead">0</b></div>
+    <div class="stat"><span>爆头率</span><b id="fhrate">0%</b></div>
+    <div class="stat"><span>本局最高连杀</span><b id="fcombo">0</b></div>
     <div class="stat"><span>历史最高</span><b id="fbest">0</b></div>
+    <div class="divider"></div>
+    <div class="sub" style="margin:4px 0 8px;letter-spacing:2px">CAREER 生涯战绩</div>
+    <div class="stat"><span>总击杀</span><b id="ctkills">0</b></div>
+    <div class="stat"><span>总爆头</span><b id="cthead">0</b></div>
+    <div class="stat"><span>综合爆头率</span><b id="cthrate">0%</b></div>
+    <div class="stat"><span>最长连杀</span><b id="ctcombo">0</b></div>
+    <div class="stat"><span>最高波次</span><b id="ctwave">0</b></div>
+    <div class="stat"><span>总局数</span><b id="ctgames">0</b></div>
     <button class="btn primary" id="btnAgain" style="margin-top:14px">再来一局</button>
     <button class="btn ghost" id="btnMenu3">返回菜单</button>
   </div>
@@ -267,7 +279,7 @@ var S = {
   score:0, kills:0, headshots:0, wave:0, hp:100, hpMax:100,
   mag:30, magMax:30, reloading:false, reloadT:0,
   fireCd:0, rate:0.095,
-  combo:0, comboT:0, best:0, bestKills:0,
+  combo:0, comboT:0, best:0, bestKills:0, maxCombo:0,
   diff:1, t:0, banner:0
 };
 var DIFF = [
@@ -275,6 +287,79 @@ var DIFF = [
   { name:'普通', espd:1.85, ehp:100, edmg:10, spawn:6,  rate:0.095,acc:0.34, max:9  },
   { name:'硬核', espd:2.45, ehp:140, edmg:15, spawn:9,  rate:0.075,acc:0.46, max:13 }
 ];
+
+/* ---------- 生涯战绩（localStorage 持久化） ---------- */
+var CF = { kills:0, head:0, combo:0, wave:0, games:0, score:0 };
+function cfLoad(){
+  try{
+    var raw = localStorage.getItem('delta_career');
+    if(raw){ var o = JSON.parse(raw);
+      if(o && typeof o === 'object'){
+        CF.kills = o.kills|0; CF.head = o.head|0; CF.combo = o.combo|0;
+        CF.wave = o.wave|0; CF.games = o.games|0; CF.score = o.score|0;
+      }
+    }
+    var b = parseInt(localStorage.getItem('delta_best')||'0',10)||0;
+    if(b > CF.score) CF.score = b;
+  }catch(e){}
+}
+function cfSave(){ try{ localStorage.setItem('delta_career', JSON.stringify(CF)); }catch(e){} }
+cfLoad();
+
+/* ---------- 音效引擎（Web Audio 纯合成，零外部文件） ---------- */
+var SFX = (function(){
+  var ctx = null, master = null, on = true;
+  function init(){
+    if(ctx) return;
+    try{
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return;
+      ctx = new AC();
+      master = ctx.createGain(); master.gain.value = 0.32; master.connect(ctx.destination);
+    }catch(e){ ctx = null; }
+  }
+  function resume(){ init(); try{ if(ctx && ctx.state === 'suspended') ctx.resume(); }catch(e){} }
+  function tone(freq, dur, type, vol, slideTo){
+    init(); if(!ctx || !on) return;
+    var t = ctx.currentTime;
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || 'square';
+    o.frequency.setValueAtTime(freq, t);
+    if(slideTo) o.frequency.exponentialRampToValueAtTime(Math.max(20, slideTo), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol || 0.3, t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 0.02);
+  }
+  function noise(dur, vol, hp, lp){
+    init(); if(!ctx || !on) return;
+    var t = ctx.currentTime;
+    var n = Math.floor(ctx.sampleRate * dur);
+    var buf = ctx.createBuffer(1, n, ctx.sampleRate);
+    var d = buf.getChannelData(0);
+    for(var i=0;i<n;i++) d[i] = (Math.random()*2-1) * (1 - i/n);
+    var src = ctx.createBufferSource(); src.buffer = buf;
+    var f = ctx.createBiquadFilter(); f.type = 'bandpass';
+    f.frequency.value = lp || 1200; f.Q.value = 0.9;
+    var g = ctx.createGain(); g.gain.value = vol || 0.3;
+    src.connect(f); f.connect(g); g.connect(master);
+    src.start(t);
+  }
+  return {
+    set:function(v){ on = !!v; },
+    isOn:function(){ return on; },
+    resume:resume,
+    shoot:function(){ noise(0.07, 0.34, 0, 2600); tone(220, 0.07, 'square', 0.16, 70); },
+    hit:function(){ tone(880, 0.05, 'triangle', 0.16, 620); },
+    head:function(){ tone(1320, 0.09, 'sawtooth', 0.2, 1760); setTimeout(function(){ tone(1760,0.09,'triangle',0.16,2200); }, 60); },
+    kill:function(){ tone(520, 0.12, 'triangle', 0.2, 780); },
+    reload:function(){ tone(160, 0.06, 'square', 0.18, 120); setTimeout(function(){ tone(220,0.06,'square',0.16,180); }, 130); },
+    hurt:function(){ noise(0.16, 0.32, 0, 380); tone(120, 0.16, 'sawtooth', 0.2, 60); },
+    wave:function(){ tone(330, 0.16, 'triangle', 0.2, 495); setTimeout(function(){ tone(495,0.22,'triangle',0.2,660); }, 150); },
+    over:function(){ tone(300, 0.5, 'sawtooth', 0.22, 90); }
+  };
+})();
 
 /* ---------- 渲染器 ---------- */
 var renderer = new THREE.WebGLRenderer({ canvas:cv, antialias:true, powerPreference:'high-performance' });
@@ -630,6 +715,7 @@ function startReload(){
   if(S.reloading || S.mag >= S.magMax) return;
   S.reloading = true; S.reloadT = 1.35;
   elReload.classList.add('on');
+  SFX.reload();
 }
 function finishReload(){
   S.reloading = false; S.mag = S.magMax;
@@ -641,6 +727,7 @@ function fire(){
   if(S.reloading || S.mag <= 0) return;
   S.mag--; S.fireCd = S.rate;
   updHUD();
+  SFX.shoot();
 
   /* 后坐力 + 枪口火焰 */
   player.recoilV += 0.055;
@@ -683,6 +770,7 @@ function fire(){
       killEnemy(e, head);
     } else {
       /* 命中但未死：轻微击退提示 */
+      if(head) SFX.head(); else SFX.hit();
       showToast(head ? '爆头! -' + Math.round(dmg) : '命中 -' + Math.round(dmg), head ? 'var(--gold)' : 'var(--accent2)');
     }
   }
@@ -694,9 +782,11 @@ function killEnemy(e, head){
   e.dying = 0.001;
   S.kills++;
   if(head) S.headshots++;
+  if(head) SFX.head(); else SFX.kill();
 
   var base = head ? 150 : 100;
   S.combo++;
+  if(S.combo > S.maxCombo) S.maxCombo = S.combo;
   S.comboT = 2.2;
   var mult = 1 + Math.min(S.combo-1, 6) * 0.25;
   S.score += Math.round(base * mult);
@@ -712,6 +802,7 @@ function hurtPlayer(dmg){
   if(S.over) return;
   S.hp -= dmg;
   dmgFlash();
+  SFX.hurt();
   if(S.hp <= 0){ S.hp = 0; updHUD(); gameOver(); return; }
   updHUD();
 }
@@ -869,6 +960,7 @@ function startWave(){
   waveState.spawning = waveState.need;
   waveState.timer = 0;
   banner('WAVE ' + S.wave);
+  if(S.wave > 1) SFX.wave();
   updHUD();
 }
 function aliveCount(){
@@ -1107,10 +1199,12 @@ function startGame(){
 
   var d = DIFF[S.diff];
   S.running = true; S.paused = false; S.over = false;
-  S.wave = 0; S.score = 0; S.kills = 0; S.headshots = 0;
+  S.wave = 0; S.score = 0; S.kills = 0; S.headshots = 0; S.maxCombo = 0;
   S.hp = S.hpMax; S.mag = S.magMax; S.reloading = false; S.combo = 0; S.comboT = 0;
   S.fireCd = 0; S._tick = 0; S.t = 0;
   waveState.spawning = 0; waveState.timer = 0; waveState._cleared = false;
+
+  SFX.resume();
 
   player.x = 0; player.z = 6; player.y = 0; player.vy = 0; player.onGround = true;
   player.yaw = 0; player.pitch = 0; player.recoil = 0; player.recoilV = 0;
@@ -1135,17 +1229,38 @@ function gameOver(){
   S.running = false; S.over = true;
   firing = false;
   if(navigator.vibrate) try{ navigator.vibrate([60,40,120]); }catch(e){}
+  SFX.over();
 
   var best = 0;
   try{ best = parseInt(localStorage.getItem('delta_best') || '0', 10) || 0; }catch(e){}
   var nb = S.score > best;
   if(nb){ try{ localStorage.setItem('delta_best', String(S.score)); }catch(e){} best = S.score; }
 
+  /* 累积生涯战绩 */
+  CF.kills += S.kills;
+  CF.head  += S.headshots;
+  CF.games += 1;
+  if(S.maxCombo > CF.combo) CF.combo = S.maxCombo;
+  if(S.wave > CF.wave) CF.wave = S.wave;
+  if(best > CF.score) CF.score = best;
+  cfSave();
+
+  var hr = S.kills > 0 ? Math.round(S.headshots / S.kills * 100) : 0;
+  var chr = CF.kills > 0 ? Math.round(CF.head / CF.kills * 100) : 0;
+
   $('fscore').textContent = S.score;
   $('fwave').textContent  = S.wave;
   $('fkills').textContent = S.kills;
   $('fhead').textContent  = S.headshots;
+  $('fhrate').textContent = hr + '%';
+  $('fcombo').textContent = S.maxCombo;
   $('fbest').textContent  = best;
+  $('ctkills').textContent = CF.kills;
+  $('cthead').textContent  = CF.head;
+  $('cthrate').textContent = chr + '%';
+  $('ctcombo').textContent = CF.combo;
+  $('ctwave').textContent  = CF.wave;
+  $('ctgames').textContent = CF.games;
   var nbEl = $('newbest');
   if(nbEl){ nbEl.style.display = nb ? 'block' : 'none'; }
   showScreen('scOver');
@@ -1196,6 +1311,23 @@ try{
   if($('mbest')) $('mbest').textContent = bb;
   if($('mkills')) $('mkills').textContent = '—';
 }catch(e){}
+
+/* 音效开关（持久化） */
+function sndLabel(){
+  var t = '音效：' + (SFX.isOn() ? '开' : '关');
+  if($('btnSnd'))  $('btnSnd').textContent  = t;
+  if($('btnSnd2')) $('btnSnd2').textContent = t;
+}
+function toggleSnd(){
+  SFX.set(!SFX.isOn());
+  try{ localStorage.setItem('delta_snd', SFX.isOn() ? '1' : '0'); }catch(e){}
+  sndLabel();
+  if(SFX.isOn()) SFX.kill();
+}
+try{ if(localStorage.getItem('delta_snd') === '0') SFX.set(false); }catch(e){}
+bindBtn('btnSnd',  function(){ toggleSnd(); });
+bindBtn('btnSnd2', function(){ toggleSnd(); });
+sndLabel();
 
 /* 窗口尺寸 */
 function onResize(){
