@@ -65,7 +65,7 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 @keyframes wm{0%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}18%{opacity:1;transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0}}
 
 /* ============ 触屏控件 ============ */
-#touch{position:fixed;inset:0;z-index:7;pointer-events:none;display:none;}
+#touch{position:fixed;inset:0;z-index:7;pointer-events:auto;display:none;}
 #touch.on{display:block;}
 #stick{position:absolute;left:26px;bottom:26px;width:132px;height:132px;border-radius:50%;
   border:2px solid rgba(255,255,255,.16);background:rgba(255,255,255,.05);pointer-events:auto;touch-action:none;}
@@ -815,6 +815,11 @@ var mouseDown = false;
 var lookId = -1, lookX = 0, lookY = 0;
 var stickId = -1, stickCX = 0, stickCY = 0, stickDX = 0, stickDY = 0;
 var isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+/* 触屏设备：显示触摸控件层（摇杆/开火/换弹/跳 + 全屏滑动转视角） */
+if(isTouch){
+  touch.classList.add('on');
+  document.documentElement.classList.add('is-touch');
+}
 
 /* ---- 键盘 ---- */
 addEventListener('keydown', function(ev){
