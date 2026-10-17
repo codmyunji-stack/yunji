@@ -64,6 +64,43 @@ html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--
 #waveMsg.on{animation:wm 1.8s ease-out;}
 @keyframes wm{0%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}18%{opacity:1;transform:translate(-50%,-50%) scale(1)}75%{opacity:1}100%{opacity:0}}
 
+/* ============ 辅助面板（可折叠浮层） ============ */
+#boostBtn{position:fixed;right:14px;top:14px;z-index:9;width:42px;height:42px;border-radius:12px;
+  border:1px solid var(--line);background:var(--panel);color:var(--accent2);font-size:19px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;pointer-events:auto;
+  backdrop-filter:blur(8px);transition:transform .18s,border-color .18s;}
+#boostBtn:hover{transform:scale(1.06);border-color:var(--accent2);}
+#boostBtn.act{border-color:var(--accent2);box-shadow:0 0 16px rgba(0,224,198,.35);}
+#boostPane{position:fixed;right:14px;top:64px;z-index:9;width:238px;max-height:72vh;overflow-y:auto;
+  border:1px solid var(--line);border-radius:14px;background:var(--panel);backdrop-filter:blur(12px);
+  padding:12px 13px;pointer-events:auto;transform:translateX(120%);opacity:0;
+  transition:transform .26s cubic-bezier(.22,1,.36,1),opacity .26s;box-shadow:0 12px 40px rgba(0,0,0,.5);}
+#boostPane.on{transform:none;opacity:1;}
+#boostPane h4{margin:0 0 10px;font-size:12px;letter-spacing:.22em;color:var(--accent2);
+  text-transform:uppercase;font-weight:800;}
+#boostPane .bgrp{margin-bottom:11px;}
+#boostPane .blab{font-size:11px;color:var(--dim);letter-spacing:.14em;margin-bottom:5px;
+  display:flex;justify-content:space-between;}
+#boostPane .bseg{display:flex;gap:4px;}
+#boostPane .bseg button{flex:1;padding:6px 0;font-size:11px;font-weight:700;border-radius:8px;
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:var(--dim);
+  cursor:pointer;transition:.15s;}
+#boostPane .bseg button.sel{background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#08080c;border-color:transparent;}
+#boostPane .brow{display:flex;align-items:center;justify-content:space-between;
+  padding:7px 0;font-size:12px;color:var(--txt);border-top:1px solid rgba(255,255,255,.07);}
+#boostPane .bsw{width:40px;height:22px;border-radius:11px;background:rgba(255,255,255,.13);
+  position:relative;cursor:pointer;transition:.2s;flex:0 0 auto;}
+#boostPane .bsw i{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;
+  background:#fff;transition:.2s;}
+#boostPane .bsw.on{background:linear-gradient(135deg,var(--accent),var(--accent2));}
+#boostPane .bsw.on i{left:21px;}
+#boostPane .bhint{font-size:10px;color:var(--dim);line-height:1.55;margin-top:8px;
+  padding-top:8px;border-top:1px solid rgba(255,255,255,.07);}
+#boostPane::-webkit-scrollbar{width:4px;}
+#boostPane::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px;}
+@media (max-width:520px){#boostPane{width:200px;}}
+
 /* ============ 触屏控件 ============ */
 #touch{position:fixed;inset:0;z-index:7;pointer-events:auto;display:none;}
 #touch.on{display:block;}
@@ -165,6 +202,24 @@ h1{margin:0 0 4px;font-size:34px;letter-spacing:.2em;text-align:center;
   <button id="fireBtn">开火</button>
   <button id="reloadBtn">换弹</button>
   <button id="jumpBtn">跳</button>
+</div>
+
+<div id="boostBtn" title="辅助面板">⚙</div>
+<div id="boostPane">
+  <h4>辅助面板</h4>
+  <div class="bgrp">
+    <div class="blab"><span>辅助矄准</span><span id="aaVal">中</span></div>
+    <div class="bseg" id="aaSeg">
+      <button data-aa="0">关</button>
+      <button data-aa="1" class="sel">中</button>
+      <button data-aa="2">强</button>
+    </div>
+  </div>
+  <div class="brow"><span>敌人高亮</span><div class="bsw" id="swGlow"><i></i></div></div>
+  <div class="brow"><span>追踪弹</span><div class="bsw" id="swHoming"><i></i></div></div>
+  <div class="brow"><span>无限弹药</span><div class="bsw" id="swAmmo"><i></i></div></div>
+  <div class="brow"><span>无敌模式</span><div class="bsw" id="swGod"><i></i></div></div>
+  <div class="bhint">辅助矄准仅在准星接近目标时缓慢吸附；追踪弹为明确标注的游戏机制。</div>
 </div>
 
 <div class="screen on" id="scMenu">
@@ -282,6 +337,13 @@ var S = {
   combo:0, comboT:0, best:0, bestKills:0, maxCombo:0,
   diff:1, t:0, banner:0
 };
+/* ---------- 辅助面板状态 ---------- */
+var BST = { aa:1, glow:false, homing:false, infAmmo:false, god:false };
+try{ var _bs = localStorage.getItem('delta_boost');
+  if(_bs){ var _bo = JSON.parse(_bs); for(var _k in BST){ if(_k in _bo) BST[_k]=_bo[_k]; } }
+}catch(e){}
+function bstSave(){ try{ localStorage.setItem('delta_boost', JSON.stringify(BST)); }catch(e){} }
+
 var DIFF = [
   { name:'轻松', espd:1.35, ehp:70,  edmg:7,  spawn:4,  rate:0.13, acc:0.22, max:6  },
   { name:'普通', espd:1.85, ehp:100, edmg:10, spawn:6,  rate:0.095,acc:0.34, max:9  },
@@ -725,7 +787,8 @@ function finishReload(){
 function fire(){
   if(!S.running || S.paused || S.over) return;
   if(S.reloading || S.mag <= 0) return;
-  S.mag--; S.fireCd = S.rate;
+  if(!BST.infAmmo) S.mag--;
+  S.fireCd = S.rate;
   updHUD();
   SFX.shoot();
 
@@ -734,6 +797,33 @@ function fire(){
   flash.visible = true; flashLight.intensity = 2.6;
   setTimeout(function(){ flash.visible = false; flashLight.intensity = 0; }, 46);
 
+  /* ---- 辅助矄准：仅在开火瞬间对准星做微量吸附 ---- */
+  if(BST.aa > 0){
+    var aimDir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+    var aaO = new THREE.Vector3(player.x, player.y + player.h + player.recoil*0.35, player.z);
+    var ao = 0.06 + BST.aa*0.07;            /* 吸附角阈值（弧度） */
+    var aaBest = null, aaBestD = 1e9;
+    for(var ai=0; ai<enemies.length; ai++){
+      var ae = enemies[ai]; if(ae.dying > 0) continue;
+      var tv = new THREE.Vector3(ae.x, 1.05, ae.z).sub(aaO);
+      var td = tv.length(); if(td < 0.2 || td > 46) continue;
+      var ang = tv.normalize().dot(aimDir);
+      if(ang < Math.cos(ao)) continue;
+      /* 只吸附未被掩体遮挡的目标 */
+      if(blockedByScene(aaO.x, aaO.y, aaO.z, tv.x, tv.y, tv.z, td) !== null) continue;
+      if(td < aaBestD){ aaBestD = td; aaBest = ae; }
+    }
+    if(aaBest){
+      var want = Math.atan2(aaBest.x - player.x, -(aaBest.z - player.z));
+      var dyaw = ((want - player.yaw + Math.PI*3) % (Math.PI*2)) - Math.PI;
+      var pull = 0.05 + BST.aa*0.06;       /* 每发子弹的微量瞫正 */
+      player.yaw += dyaw * pull;
+      var wpitch = Math.atan2((1.05 - (player.y + player.h)), aaBestD);
+      player.pitch += (wpitch - player.pitch) * pull * 0.7;
+      clampPitch();
+    }
+  }
+
   /* 弹道方向：从相机中心出发，加少量散布 */
   var dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
   var spread = 0.006 + player.recoil*0.09;
@@ -741,6 +831,33 @@ function fire(){
   dir.y += (Math.random()-0.5)*spread;
   dir.z += (Math.random()-0.5)*spread;
   dir.normalize();
+
+  /* ---- 追踪弹（明确标注的游戏机制）：子弹朝目标做小角度偏转 ---- */
+  if(BST.homing){
+    var hOrigin = new THREE.Vector3(player.x, player.y + player.h + player.recoil*0.35, player.z);
+    var hBest = null, hBestT = 1e9;
+    for(var hi=0; hi<enemies.length; hi++){
+      var he = enemies[hi]; if(he.dying > 0) continue;
+      var hr = rayHitsEnemy(hOrigin.x, hOrigin.y, hOrigin.z, dir.x, dir.y, dir.z, he);
+      if(hr && hr.t < hBestT){ hBestT = hr.t; hBest = he; }
+    }
+    /* 若当前弹道未命中，但视野内有目标，则朝其微调 */
+    if(!hBest){
+      var hDir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+      var hNear = null, hNearAng = 0.20;
+      for(var hj=0; hj<enemies.length; hj++){
+        var h2 = enemies[hj]; if(h2.dying > 0) continue;
+        var hv = new THREE.Vector3(h2.x, 1.05, h2.z).sub(hOrigin);
+        var hd = hv.length(); if(hd < 0.2 || hd > 40) continue;
+        hv.normalize();
+        var ha = hv.dot(hDir);
+        if(ha > Math.cos(hNearAng)){ hNearAng = 0; hNear = hv.clone(); }
+      }
+      if(hNear){
+        dir.lerp(hNear, 0.42).normalize();   /* 42% 偏向最近目标 */
+      }
+    }
+  }
 
   var origin = new THREE.Vector3(player.x, player.y + player.h + player.recoil*0.35, player.z);
 
@@ -1122,12 +1239,45 @@ function update(dt){
 
     e.g.position.set(e.x, e.g.position.y, e.z);
 
+    /* ---- 敌人高亮（仅视野内，非穿墙）
+       敌人用 MeshLambertMaterial，无 emissive：
+       用 color 同步依此便lerp 到青绿 + 呼吸脉冲，并复用 userData.orig 保存原色 ---- */
+    if(BST.glow || e._hl !== undefined){
+      var gp = new THREE.Vector3(e.x, 1.0, e.z);
+      var cd = gp.clone().sub(camera.position);
+      var cdlen = cd.length();
+      var vis = false;
+      if(BST.glow){
+        vis = true;
+        if(cdlen > 0.2){
+          var cdn = cd.clone().normalize();
+          var fd = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+          if(cdn.dot(fd) < Math.cos(1.05)) vis = false;
+          if(vis && blockedByScene(camera.position.x, camera.position.y, camera.position.z,
+               cdn.x, cdn.y, cdn.z, cdlen - 0.6) !== null) vis = false;
+        }
+      }
+      /* 仅在状态变化时重写颜色（避免每帧垃圾量过大） */
+      if(e._hl !== vis || e._hlPulse === undefined){
+        e._hl = vis;
+        var k = vis ? (0.42 + Math.sin(S.t*6)*0.14) : 0;   /* 高亮强度 0〜0.56 */
+        e.g.traverse(function(m){
+          if(!m.isMesh || !m.material || !m.material.color) return;
+          if(m.userData.orig === undefined) m.userData.orig = m.material.color.getHex();
+          var o = new THREE.Color(m.userData.orig);
+          var t = new THREE.Color(0x00e0c6);
+          m.material.color.copy(o).lerp(t, k);
+        });
+        e._hlPulse = (k*100)|0;
+      }
+    }
+
     /* 攻击玩家 */
     e.atkCd -= dt;
     if(dist < 1.9 && e.atkCd <= 0){
       e.atkCd = 1.05;
       var hit = Math.random() < (0.55 + e.acc*0.4);
-      if(hit) hurtPlayer(e.dmg);
+      if(hit && !BST.god) hurtPlayer(e.dmg);
       /* 敌人挥臂 */
       e.armR.rotation.x = -1.4;
     }
@@ -1170,6 +1320,58 @@ function update(dt){
 /* ============================================================
    渲染主循环
    ============================================================ */
+/* ============================================================
+   辅助面板 UI 绑定
+   ============================================================ */
+(function initBoost(){
+  var btn = document.getElementById('boostBtn');
+  var pane = document.getElementById('boostPane');
+  if(!btn || !pane) return;
+
+  function sync(){
+    var seg = document.getElementById('aaSeg');
+    var kids = seg.getElementsByTagName('button');
+    for(var i=0;i<kids.length;i++){
+      kids[i].className = (parseInt(kids[i].getAttribute('data-aa'),10) === BST.aa) ? 'sel' : '';
+    }
+    document.getElementById('aaVal').textContent = ['关','中','强'][BST.aa] || '中';
+    [['swGlow','glow'],['swHoming','homing'],['swAmmo','infAmmo'],['swGod','god']].forEach(function(p){
+      var el = document.getElementById(p[0]);
+      if(el) el.className = 'bsw' + (BST[p[1]] ? ' on' : '');
+    });
+    btn.className = (BST.aa>0 || BST.glow || BST.homing) ? 'act' : '';
+  }
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    pane.classList.toggle('on'); sync();
+  });
+  pane.addEventListener('click', function(e){ e.stopPropagation(); });
+
+  var seg = document.getElementById('aaSeg');
+  seg.addEventListener('click', function(e){
+    var t = e.target;
+    if(t.tagName !== 'BUTTON') return;
+    BST.aa = parseInt(t.getAttribute('data-aa'), 10) || 0;
+    bstSave(); sync();
+    try{ showToast('辅助矄准：' + ['关','中','强'][BST.aa], 'var(--accent2)'); }catch(_){}
+  });
+
+  [['swGlow','glow','敌人高亮'],['swHoming','homing','追踪弹'],
+   ['swAmmo','infAmmo','无限弹药'],['swGod','god','无敌模式']].forEach(function(p){
+    var el = document.getElementById(p[0]);
+    if(!el) return;
+    el.addEventListener('click', function(e){
+      e.stopPropagation();
+      BST[p[1]] = !BST[p[1]];
+      bstSave(); sync();
+      try{ showToast(p[2] + '：' + (BST[p[1]] ? '开' : '关'), BST[p[1]] ? 'var(--ok)' : 'var(--dim)'); }catch(_){}
+    });
+  });
+
+  sync();
+})();
+
 var _last = 0;
 function loop(now){
   requestAnimationFrame(loop);
